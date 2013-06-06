@@ -21,10 +21,10 @@ class Spartacus(Linkbot):
     delta = -abs(self.__norm(self.__current_number) - number)
     self.__current_number += delta
     if abs(delta) <= 4:
-      self.driveJointToNB(1, self.__current_number * -360.0 / 40.0)
+      self.driveJointToNB(2, self.__current_number * -360.0 / 40.0)
       self.__moveWait()
     else:
-      self.moveJointToNB(1, self.__current_number * -360.0 / 40.0)
+      self.moveJointToNB(2, self.__current_number * -360.0 / 40.0)
       self.__moveWait()
   
   def ccwToNumber(self, number): 
@@ -36,10 +36,10 @@ class Spartacus(Linkbot):
     delta = abs(self.__norm(self.__current_number) - number)
     self.__current_number += delta
     if abs(delta) <= 4:
-      self.driveJointToNB(1, self.__current_number * -360.0 / 40.0)
+      self.driveJointToNB(2, self.__current_number * -360.0 / 40.0)
       self.__moveWait()
     else:
-      self.moveJointToNB(1, self.__current_number * -360.0 / 40.0)
+      self.moveJointToNB(2, self.__current_number * -360.0 / 40.0)
       self.__moveWait()
 
   def resetToNumber(self, number):
@@ -81,9 +81,24 @@ class Spartacus(Linkbot):
     return num
 
   def __moveWait(self):
-    [j1, _, _] = self.getJointAngles()
-    j1 = j1 * -40.0 / 360.0
-    while abs( j1 - self.__current_number) > 0.5:
-      [j1, _, _] = self.getJointAngles()
-      j1 = j1 * -40.0 / 360.0
+    [j1, j2, _] = self.getJointAngles()
+    j2 = j2 * -40.0 / 360.0
+    while abs( j2 - self.__current_number) > 0.5:
+      [j1, j2, _] = self.getJointAngles()
+      j2 = j2 * -40.0 / 360.0
+
+  def checkShackle(self):
+    """Check the shackle. If it opens, return True, otherwise False"""
+    [_, j2, _] = self.getJointAngles()
+    self.setMotorPower(1, 255)
+    time.sleep(0.5)
+    [_, j2b, _] = self.getJointAngles()
+    if abs(j2 - j2b) > 5:
+      self.setMotorPower(1, 0)
+      return True
+    else:
+      self.setMotorPower(1, -255)
+      time.sleep(0.5)
+      self.setMotorPower(1, 0)
+      return False
 
