@@ -16,6 +16,7 @@ class Spartacus(Linkbot):
     """Turn the combo-lock dial clockwise to get to the specified dial number.
 
        If the dial is already at the number, a full rotation is performed."""
+    self.setMotorPower(1, -255)
     while number >= self.__norm(self.__current_number):
       number -= 40
     delta = -abs(self.__norm(self.__current_number) - number)
@@ -31,6 +32,7 @@ class Spartacus(Linkbot):
     """Turn the combo-lock dial counter-clockwise to get to the specified dial number.
 
        If the dial is already at the number, a full rotation is performed."""
+    self.setMotorPower(1, -255)
     while number <= self.__norm(self.__current_number):
       number += 40
     delta = abs(self.__norm(self.__current_number) - number)
@@ -64,13 +66,12 @@ class Spartacus(Linkbot):
       for j in num3range:
         print "Testing combo: {0}, {1}, {2}".format(firstnum, i, j)
         self.cwToNumber(j)
-        self.setMotorPower(2, 200)
-        time.sleep(0.5)
-        self.setMotorPower(2, -200)
-        time.sleep(0.5)
-        self.setMotorPower(2, 0)
+        if self.checkShackle():
+          print "Combination found!! {0} - {1} - {2}".format(firstnum, i, j)
+          return True 
       print "Moving back to second ring..."
       self.ccwToNumber(i)
+    return False 
 
 
   def __norm(self, num):
@@ -83,22 +84,29 @@ class Spartacus(Linkbot):
   def __moveWait(self):
     [j1, j2, _] = self.getJointAngles()
     j2 = j2 * -40.0 / 360.0
+    time.sleep(0.1)
     while abs( j2 - self.__current_number) > 0.5:
       [j1, j2, _] = self.getJointAngles()
       j2 = j2 * -40.0 / 360.0
+      time.sleep(0.1)
 
   def checkShackle(self):
     """Check the shackle. If it opens, return True, otherwise False"""
-    [_, j2, _] = self.getJointAngles()
-    self.setMotorPower(1, 255)
-    time.sleep(0.5)
-    [_, j2b, _] = self.getJointAngles()
-    if abs(j2 - j2b) > 5:
-      self.setMotorPower(1, 0)
-      return True
-    else:
+    [j1, _, _] = self.getJointAngles()
+    """
+    for i in range(2):
       self.setMotorPower(1, -255)
       time.sleep(0.5)
-      self.setMotorPower(1, 0)
+      self.setMotorPower(1, 255)
+      time.sleep(0.5)
+    """
+    self.setMotorPower(1, 255)
+    time.sleep(0.6)
+    self.setMotorPower(1, 0)
+    [j1b, _, _] = self.getJointAngles()
+    self.setMotorPower(1, 0)
+    if abs(j1 - j1b) > 4:
+      return True
+    else:
       return False
 
