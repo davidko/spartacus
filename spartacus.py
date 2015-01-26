@@ -1,22 +1,22 @@
-#!/usr/bin/env/python
-from barobo.linkbot import *
+#!/usr/bin/env python3
+from linkbot import Linkbot
 import time
 
 class Spartacus(Linkbot):
-  def __init__(self):
+  def __init__(self, *args, **kwargs):
     self.__current_number = 0
-    Linkbot.__init__(self)
+    Linkbot.__init__(self, *args, **kwargs)
     self.combo_guess1 = 0
     self.combo_guess2 = 0
     self.combo_guess3 = 0
+    self.trial_run = False
 
-#Testing combo: 0, 2, 36
-#CW Delta -36 0 36
   def cwToNumber(self, number):
     """Turn the combo-lock dial clockwise to get to the specified dial number.
 
        If the dial is already at the number, a full rotation is performed."""
-    self.setMotorPower(1, -255)
+    if not self.trial_run:
+        self.setMotorPower(1, -255)
     while number >= self.__norm(self.__current_number):
       number -= 40
     delta = -abs(self.__norm(self.__current_number) - number)
@@ -32,7 +32,8 @@ class Spartacus(Linkbot):
     """Turn the combo-lock dial counter-clockwise to get to the specified dial number.
 
        If the dial is already at the number, a full rotation is performed."""
-    self.setMotorPower(1, -255)
+    if not self.trial_run:
+        self.setMotorPower(1, -255)
     while number <= self.__norm(self.__current_number):
       number += 40
     delta = abs(self.__norm(self.__current_number) - number)
@@ -50,26 +51,26 @@ class Spartacus(Linkbot):
     self.cwToNumber(number)
 
   def guess_combos(self, firstnum):
-    print "Resetting to first num..."
+    print("Resetting to first num...")
     self.resetToNumber(firstnum)
-    num2range = range(firstnum+2, firstnum + 2 + 40, 4)
-    num2range = map( lambda x: x%40, num2range)
+    num2range = list(range(firstnum+2, firstnum + 2 + 40, 4))
+    num2range = [x%40 for x in num2range]
     # CCW one full rotation to engage second ring
-    print "Engaging second ring..."
+    print("Engaging second ring...")
     self.ccwToNumber(firstnum)
     for i in num2range:
-      print "Moving to second number"
+      print("Moving to second number")
       self.ccwToNumber(i)
-      num3range = range(i+2, i+2+40, 4)
-      num3range = map( lambda x: x%40, num3range)
+      num3range = list(range(i+2, i+2+40, 4))
+      num3range = [x%40 for x in num3range]
       num3range = reversed(num3range)
       for j in num3range:
-        print "Testing combo: {0}, {1}, {2}".format(firstnum, i, j)
+        print("Testing combo: {0}, {1}, {2}".format(firstnum, i, j))
         self.cwToNumber(j)
         if self.checkShackle():
-          print "Combination found!! {0} - {1} - {2}".format(firstnum, i, j)
+          print("Combination found!! {0} - {1} - {2}".format(firstnum, i, j))
           return True 
-      print "Moving back to second ring..."
+      print("Moving back to second ring...")
       self.ccwToNumber(i)
     return False 
 
@@ -100,7 +101,8 @@ class Spartacus(Linkbot):
       self.setMotorPower(1, 255)
       time.sleep(0.5)
     """
-    self.setMotorPower(1, 255)
+    if not self.trial_run:
+        self.setMotorPower(1, 255)
     time.sleep(0.6)
     self.setMotorPower(1, 0)
     [j1b, _, _] = self.getJointAngles()
