@@ -15,7 +15,7 @@ class Spartacus(Linkbot):
     """Turn the combo-lock dial clockwise to get to the specified dial number.
 
        If the dial is already at the number, a full rotation is performed."""
-    orig_number = number
+    print('CW to ', number)
     if not self.trial_run:
         self.setMotorPower(1, -255)
     while number >= self.__norm(self.__current_number):
@@ -28,14 +28,13 @@ class Spartacus(Linkbot):
     else:
       self.moveJointToNB(2, self.__current_number * -360.0 / 40.0)
       self.__moveWait()
-    print('CW to ', orig_number)
     input()
   
   def ccwToNumber(self, number): 
     """Turn the combo-lock dial counter-clockwise to get to the specified dial number.
 
        If the dial is already at the number, a full rotation is performed."""
-    orig_number = number
+    print('CCW to ', number)
     if not self.trial_run:
         self.setMotorPower(1, -255)
     while number <= self.__norm(self.__current_number):
@@ -48,7 +47,6 @@ class Spartacus(Linkbot):
     else:
       self.moveJointToNB(2, self.__current_number * -360.0 / 40.0)
       self.__moveWait()
-    print('CCW to ', orig_number)
     input()
 
   def resetToNumber(self, number):
