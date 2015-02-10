@@ -27,6 +27,8 @@ class Spartacus(Linkbot):
     else:
       self.moveJointToNB(2, self.__current_number * -360.0 / 40.0)
       self.__moveWait()
+    print('CW to ', number)
+    input()
   
   def ccwToNumber(self, number): 
     """Turn the combo-lock dial counter-clockwise to get to the specified dial number.
@@ -44,6 +46,8 @@ class Spartacus(Linkbot):
     else:
       self.moveJointToNB(2, self.__current_number * -360.0 / 40.0)
       self.__moveWait()
+    print('CCW to ', number)
+    input()
 
   def resetToNumber(self, number):
     self.cwToNumber(number)
